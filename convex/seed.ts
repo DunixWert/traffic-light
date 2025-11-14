@@ -1,5 +1,11 @@
 import { internalMutation } from "./_generated/server";
+/*
+Insert Morale Data into the "morale" Table
 
+This script seeds the "morale" table with a predefined list of emotions
+and their associated types (Positive, Neutral, Negative). It checks for
+existing entries to avoid duplicates.
+*/
 // The list of emotions from the project plan
 const moraleData = [
   { name: "Joyful", type: "Positive" },
@@ -137,3 +143,31 @@ export const seedMoraleTable = internalMutation({
     return message;
   },
 });
+
+/*
+Insert Team Data into the "teams" Table
+
+This script seeds the "teams" table with a predefined list of team names.
+It checks for existing entries to avoid duplicates.
+*/
+const teams = ["Engineering", "Marketing", "Sales", "HR", "Design"] as const;
+
+export const seedTeamTable = internalMutation({
+  handler: async (ctx) => {
+    const existingTeams = await ctx.db.query("teams").collect();
+    const existingTeamNames = new Set(existingTeams.map((t) => t.name));
+    const newTeams = teams.filter((team) => !existingTeamNames.has(team));
+
+    if (newTeams.length === 0) {
+      const message = "Seeding complete. No new teams to add.";
+      console.log(message);
+      return message;
+    }
+    console.log(`Found ${newTeams.length} new teams to add. Seeding...`);
+    await Promise.all(
+      newTeams.map((team) => {
+        ctx.db.insert("teams", { name: team });
+      })
+    );
+  }
+})
