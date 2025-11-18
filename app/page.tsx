@@ -2,7 +2,7 @@
 
 import { useMutation,useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { EmotionsSelector } from "@/components/ui/emotions-selector";
@@ -48,6 +48,46 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false); // UI loading state
+  const [showMore, setShowMore] = useState(false); // State for "More Emotions" toggle
+
+  // --- DYNAMIC BACKGROUND ---
+  useEffect(() => {
+    if (!moraleOptions.length) return;
+
+    // 1. Find the objects for the selected IDs
+    const selectedItems = moraleOptions.filter(m => selectedEmotions.includes(m.id));
+    
+    // 2. Determine dominance
+    const hasPositive = selectedItems.some(i => i.type === 'Positive');
+    const hasNegative = selectedItems.some(i => i.type === 'Negative');
+    const hasNeutral = selectedItems.some(i => i.type === 'Neutral');
+
+    let start = "rgba(255, 99, 71, 0.01)"; // Default Red
+    let mid   = "rgba(255, 165, 0, 0.01)"; // Default Amber
+    let end   = "rgba(50, 205, 50, 0.01)"; // Default Green
+
+    // Logic: If purely one type, flood the background with that color
+    // If mixed (e.g. Bittersweet), keep the rainbow
+    if (selectedItems.length > 0) {
+      if (hasPositive && !hasNegative && !hasNeutral) {
+        // Purely Positive -> All Green
+        start = mid = end = "rgba(50, 205, 50, 0.03)";
+      } else if (hasNegative && !hasPositive && !hasNeutral) {
+        // Purely Negative -> All Red
+        start = mid = end = "rgba(255, 38, 0, 0.03)";
+      } else if (hasNeutral && !hasPositive && !hasNegative) {
+         // Purely Neutral -> All Amber
+        start = mid = end = "rgba(255, 165, 0, 0.03)";
+      }
+    }
+
+    // 3. Apply to Body
+    document.body.style.setProperty('--traffic-start', start);
+    document.body.style.setProperty('--traffic-mid', mid);
+    document.body.style.setProperty('--traffic-end', end);
+
+  }, [selectedEmotions, moraleOptions]);
+  // --- DYNAMIC BACKGROUND LOGIC END ---
 
   // 4. Handle Submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,6 +129,9 @@ export default function Home() {
       setSelectedEmotions([]);
       setEmail("");
       setComment("");
+      if (showMore) {
+          setShowMore(false);
+      }
       // Optional: Keep team/email if you want them to persist
       
     } catch (error) {
@@ -108,12 +151,15 @@ export default function Home() {
       <h1 className="text-3xl font-bold">How are you feeling today?</h1>
       <p className="text-slate-600 mt-2">Your selection is anonymous.</p>
       
-      <form onSubmit={handleSubmit}className="flex flex-col gap-4 mt-8 w-full max-w-md" noValidate>
+      <form onSubmit={handleSubmit}className="flex flex-col gap-4 mt-8 w-full max-w-md " noValidate>
         <EmotionsSelector 
           moraleData={moraleOptions} 
           selectedIds={selectedEmotions}
           onChange={setSelectedEmotions}
-          isLoading={isLoading}/>
+          isLoading={isLoading}
+          showMore={showMore}
+          onToggleShowMore={() => setShowMore(!showMore)}
+          />
         
         {/*#TODO: Readd Team field and add */}
         {/* <label>Which team are you on? (Optional)</label>

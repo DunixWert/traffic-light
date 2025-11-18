@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { MoraleData } from '@/lib/types';
-
+import { Button } from "@/components/ui/button";
 interface EmotionsSelectorProps {
   moraleData: MoraleData[];
   selectedIds: string[];
   onChange: (ids: string[]) => void;
   isLoading: boolean;
+
+  showMore: boolean;
+  onToggleShowMore: () => void;
 }
 
 const LoadingSkeleton = () => (
@@ -33,8 +36,7 @@ const LoadingSkeleton = () => (
   </div>
 );
 //#TODO Add a emotion recommendation based on previous selections
-export function EmotionsSelector({ moraleData, selectedIds, onChange, isLoading }: EmotionsSelectorProps) {
-  const [showMore, setShowMore] = useState(false);
+export function EmotionsSelector({ moraleData, selectedIds, onChange, isLoading,showMore,onToggleShowMore }: EmotionsSelectorProps) {
   const [animatingId, setAnimatingId] = useState<string | null>(null);
 
   // Handle toggle with animation
@@ -95,7 +97,7 @@ export function EmotionsSelector({ moraleData, selectedIds, onChange, isLoading 
         <div className="text-center ">
           <button
             type="button"
-            onClick={() => setShowMore(!showMore)}
+            onClick={onToggleShowMore}
             className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
           >
             <span className="flex gap-1" aria-hidden="true">
@@ -103,7 +105,7 @@ export function EmotionsSelector({ moraleData, selectedIds, onChange, isLoading 
               <span className="w-2 h-2 rounded-full bg-amber-500 shadow-sm"></span>
               <span className="w-2 h-2 rounded-full bg-red-500 shadow-sm"></span>
             </span>
-            <span>{showMore ? "Hide more emotions" : "More emotions..."}</span>
+            <span className="text-blue-600 hover:text-blue-900 transition-colors">{showMore ? "Hide more emotions" : "More emotions..."}</span>
           </button>
         </div>
 
@@ -150,13 +152,14 @@ export function EmotionsSelector({ moraleData, selectedIds, onChange, isLoading 
           <div className="pt-4 border-t border-slate-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex justify-between items-center mb-3">
               <p className="text-sm font-semibold text-slate-700">Your selections:</p>
-              <button
+              <Button
                 type="button"
                 onClick={clearAll}
+                variant="link"
                 className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
               >
                 Clear all
-              </button>
+              </Button>
             </div>
 
             <div className="flex flex-wrap gap-2">

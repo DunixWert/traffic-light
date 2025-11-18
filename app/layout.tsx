@@ -30,8 +30,8 @@ export default function RootLayout({
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        <body 
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-traffic-pulse`}
         >
           <ConvexClientProvider>{children}</ConvexClientProvider>
           <Toaster 
