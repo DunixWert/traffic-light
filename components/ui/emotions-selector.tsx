@@ -114,7 +114,7 @@ export function EmotionsSelector({ moraleData, selectedIds, onChange, isLoading,
           transition-all duration-500 ease-in-out overflow-hidden
           ${showMore ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}
         `}>
-          <div className="flex flex-wrap gap-2 pt-2 max-h-60 overflow-y-auto">
+          <div className="flex flex-wrap gap-2 pt-2 max-h-80 overflow-y-auto">
             {detailedEmotions.map((emotion) => {
               const isSelected = selectedIds.includes(emotion.id);
               const isAnimating = animatingId === emotion.id;
