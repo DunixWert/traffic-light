@@ -40,33 +40,21 @@ export default function Home() {
   }
 };
   const moraleOptions: MoraleData[] = (rawMoraleOptions || []).map(option => ({
-    id: option._id, // Use the Convex document ID
+    id: option._id, 
     name: option.name,
-    type: option.type as MoraleType, // Type assertion/check may be needed here
-    color: getColorForType(option.type as MoraleType), // Apply the color logic
+    type: option.type as MoraleType, 
+    color: getColorForType(option.type as MoraleType), 
   }));
   const isLoading = rawMoraleOptions === undefined; // for loading state of emotion selector
-  // 2. Add state for your form inputs [cite: 29-32]
+  
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
-  const [team, setTeam] = useState("");
+  //const [team, setTeam] = useState("");
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
   
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   // 3. Call your mutation
-  //   await submitFeedback({
-  //     emotions: selectedEmotions,
-  //     teamId: team, // You'll need to match this to your schema
-  //     email: email,
-  //     comment: comment,
-  //   });
-  //   // Maybe show a "Thank you" message
-  // };
 
   return (
     <main className="p-8 flex flex-col items-center">
-      {/* 4. Add your "How are you feeling today?" UI here [cite: 32] */}
       <h1 className="text-3xl font-bold">How are you feeling today?</h1>
       <p className="text-slate-600 mt-2">Your selection is anonymous.</p>
       

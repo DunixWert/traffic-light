@@ -11,7 +11,6 @@
 import type * as auth from "../auth.js";
 import type * as form from "../form.js";
 import type * as http from "../http.js";
-import type * as myFunctions from "../myFunctions.js";
 import type * as seed from "../seed.js";
 
 import type {
@@ -24,7 +23,6 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   form: typeof form;
   http: typeof http;
-  myFunctions: typeof myFunctions;
   seed: typeof seed;
 }>;
 
