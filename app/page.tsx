@@ -17,6 +17,8 @@ import {
   
 } from "@/components/ui/select";
 import { MoraleData, MoraleType } from "@/lib/types";
+import { Id } from "@/convex/_generated/dataModel";
+import { Button } from "@/components/ui/button";
 
 // You'll probably move SignOutButton to its own file.
 // We don't need useQuery or useConvexAuth on this page.
@@ -26,7 +28,7 @@ export default function Home() {
   // 1. Add your mutation for submitting feedback
   //const submitFeedback = useMutation(api.feedback.submit); // (You'll need to create this)
   const rawMoraleOptions = useQuery(api.form.getAllMorale);
-
+  const submitFeedback = useMutation(api.feedback.submit);
   const getColorForType = (type: MoraleType): string => {
   switch (type) {
     case 'Positive':
@@ -51,14 +53,51 @@ export default function Home() {
   //const [team, setTeam] = useState("");
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
-  
+  const [isSubmitting, setIsSubmitting] = useState(false); // UI loading state
+
+  // 4. Handle Submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (selectedEmotions.length === 0) {
+      alert("Please select at least one emotion.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Call the mutation
+      await submitFeedback({
+        moraleIds: selectedEmotions as Id<"morale">[], // Cast string[] to Convex IDs
+        //teamId: team || undefined, 
+        email: email || undefined,
+        comment: comment || undefined,
+      });
+
+      // Success Feedback
+      alert("Feedback submitted successfully!");
+      
+      // Reset Form
+      setSelectedEmotions([]);
+      setComment("");
+      // Optional: Keep team/email if you want them to persist
+      
+    } catch (error) {
+      console.error("Submission failed:", error);
+      alert("Failed to submit feedback. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="p-8 flex flex-col items-center">
+
       <h1 className="text-3xl font-bold">How are you feeling today?</h1>
       <p className="text-slate-600 mt-2">Your selection is anonymous.</p>
       
-      <form className="flex flex-col gap-4 mt-8 w-full max-w-md">
+      <form onSubmit={handleSubmit}className="flex flex-col gap-4 mt-8 w-full max-w-md">
         <EmotionsSelector 
           moraleData={moraleOptions} 
           selectedIds={selectedEmotions}
@@ -93,12 +132,13 @@ export default function Home() {
           onChange={(e) => setComment(e.target.value)}
         />
 
-        <button 
+        <Button 
           type="submit" 
+          disabled={isSubmitting || isLoading}
           className="bg-blue-600 text-white p-3 rounded-lg font-medium"
         >
           Submit Status
-        </button>
+        </Button>
       </form>
     </main>
   );
