@@ -1,10 +1,11 @@
 "use client";
 
-import { useMutation } from "convex/react";
+import { useMutation,useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { EmotionsSelector } from "@/components/ui/emotions-selector";
 import {
   Select, 
   SelectContent,
@@ -13,20 +14,43 @@ import {
   SelectTrigger,
   SelectValue,
   SelectGroup,
+  
 } from "@/components/ui/select";
+import { MoraleData, MoraleType } from "@/lib/types";
+
 // You'll probably move SignOutButton to its own file.
 // We don't need useQuery or useConvexAuth on this page.
 
 export default function Home() {
+  // TODO: Add submit to Convex
   // 1. Add your mutation for submitting feedback
   //const submitFeedback = useMutation(api.feedback.submit); // (You'll need to create this)
+  const rawMoraleOptions = useQuery(api.form.getAllMorale);
+
+  const getColorForType = (type: MoraleType): string => {
+  switch (type) {
+    case 'Positive':
+      return 'border-green-500 bg-green-50';
+    case 'Neutral':
+      return 'border-amber-500 bg-amber-50';
+    case 'Negative':
+      return 'border-red-500 bg-red-50';
+    default:
+      return 'gray';
+  }
+};
+  const moraleOptions: MoraleData[] = (rawMoraleOptions || []).map(option => ({
+    id: option._id, // Use the Convex document ID
+    name: option.name,
+    type: option.type as MoraleType, // Type assertion/check may be needed here
+    color: getColorForType(option.type as MoraleType), // Apply the color logic
+  }));
 
   // 2. Add state for your form inputs [cite: 29-32]
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [team, setTeam] = useState("");
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
-
   // const handleSubmit = async (e: React.FormEvent) => {
   //   e.preventDefault();
   //   // 3. Call your mutation
@@ -46,11 +70,15 @@ export default function Home() {
       <p className="text-slate-600 mt-2">Your selection is anonymous.</p>
       
       <form className="flex flex-col gap-4 mt-8 w-full max-w-md">
-        {/* Add your emotion selectors (Good, Okay, Struggling, etc.) 
-          These will update the `selectedEmotions` state.
-        */}
+        <EmotionsSelector 
+          moraleData={moraleOptions} 
+          selectedIds={selectedEmotions}
+          onChange={setSelectedEmotions}>
 
-        <label>Which team are you on? (Optional)</label>
+        </EmotionsSelector>
+
+        {/*#TODO: Readd Team field and add */}
+        {/* <label>Which team are you on? (Optional)</label>
         <Select>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select a Team [optional]" />
@@ -61,7 +89,7 @@ export default function Home() {
           
         </SelectGroup>
       </SelectContent>
-    </Select>
+    </Select> */}
         
         <label>Your email (Optional)</label>
         <Input 
