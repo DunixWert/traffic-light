@@ -6,27 +6,19 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { EmotionsSelector } from "@/components/ui/emotions-selector";
-import {
-  Select, 
-  SelectContent,
-  SelectLabel,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectGroup,
-  
-} from "@/components/ui/select";
 import { MoraleData, MoraleType } from "@/lib/types";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import { toast } from 'sonner';
 
-// You'll probably move SignOutButton to its own file.
-// We don't need useQuery or useConvexAuth on this page.
+const TOAST_DURATION = 2000;
+//Helper function
+const isValidEmail = (email: string) => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
 
 export default function Home() {
-  // TODO: Add submit to Convex
-  // 1. Add your mutation for submitting feedback
-  //const submitFeedback = useMutation(api.feedback.submit); // (You'll need to create this)
   const rawMoraleOptions = useQuery(api.form.getAllMorale);
   const submitFeedback = useMutation(api.feedback.submit);
   const getColorForType = (type: MoraleType): string => {
@@ -40,6 +32,8 @@ export default function Home() {
     default:
       return 'gray';
   }
+
+
 };
   const moraleOptions: MoraleData[] = (rawMoraleOptions || []).map(option => ({
     id: option._id, 
@@ -60,7 +54,18 @@ export default function Home() {
     e.preventDefault();
 
     if (selectedEmotions.length === 0) {
-      alert("Please select at least one emotion.");
+      toast.warning("Selection Required", {
+        description: "Please choose at least one emotion to continue.",
+        duration: TOAST_DURATION,
+        icon: <span className="text-lg">⚠️</span> 
+      });
+      return;
+    }
+    if (email && !isValidEmail(email)) {
+      toast.error("Invalid Email", {
+        description: "Please enter a valid email address (e.g., user@example.com) or leave the field empty.",
+        duration: TOAST_DURATION,
+      });
       return;
     }
 
@@ -76,16 +81,22 @@ export default function Home() {
       });
 
       // Success Feedback
-      alert("Feedback submitted successfully!");
+      toast("Success ", {
+          description: "Successfully submitted your status report!"
+        });
       
       // Reset Form
       setSelectedEmotions([]);
+      setEmail("");
       setComment("");
       // Optional: Keep team/email if you want them to persist
       
     } catch (error) {
       console.error("Submission failed:", error);
-      alert("Failed to submit feedback. Please try again.");
+      toast.error("Submission Failed", {
+        description: "An error occurred while submitting your status. Please try again later.",
+        duration: TOAST_DURATION,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -97,7 +108,7 @@ export default function Home() {
       <h1 className="text-3xl font-bold">How are you feeling today?</h1>
       <p className="text-slate-600 mt-2">Your selection is anonymous.</p>
       
-      <form onSubmit={handleSubmit}className="flex flex-col gap-4 mt-8 w-full max-w-md">
+      <form onSubmit={handleSubmit}className="flex flex-col gap-4 mt-8 w-full max-w-md" noValidate>
         <EmotionsSelector 
           moraleData={moraleOptions} 
           selectedIds={selectedEmotions}
