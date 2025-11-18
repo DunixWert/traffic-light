@@ -45,12 +45,13 @@ export default function Home() {
     type: option.type as MoraleType, // Type assertion/check may be needed here
     color: getColorForType(option.type as MoraleType), // Apply the color logic
   }));
-
+  const isLoading = rawMoraleOptions === undefined; // for loading state of emotion selector
   // 2. Add state for your form inputs [cite: 29-32]
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [team, setTeam] = useState("");
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
+  
   // const handleSubmit = async (e: React.FormEvent) => {
   //   e.preventDefault();
   //   // 3. Call your mutation
@@ -73,10 +74,9 @@ export default function Home() {
         <EmotionsSelector 
           moraleData={moraleOptions} 
           selectedIds={selectedEmotions}
-          onChange={setSelectedEmotions}>
-
-        </EmotionsSelector>
-
+          onChange={setSelectedEmotions}
+          isLoading={isLoading}/>
+        
         {/*#TODO: Readd Team field and add */}
         {/* <label>Which team are you on? (Optional)</label>
         <Select>
