@@ -1,32 +1,41 @@
-/*
-TODO: 
- Steps:
-    1. How to get feedback data from frontend form
-        1.1 
-    2. Insert feedback data into "feedback" table
-    3. Link feedback to "morale" entries via references
-    4. Optional: Link feedback to "teams" if provided
-    5. Handle optional email and comment fields
-*/
-
 import {mutation} from "./_generated/server";
 import { v } from "convex/values";
-// Mutation to submit feedback
+
 export const submit = mutation({
-  // Define the arguments the mutation expects
+ 
   args: {
     moraleIds: v.array(v.id("morale")), // Array of selected emotion IDs
-    //teamId: v.optional(v.string()),     
+    teamId: v.optional(v.id("teams")),     
     email: v.optional(v.string()),      
     comment: v.optional(v.string()),    
   },
   handler: async (ctx, args) => {
-    
+    const selectedMorales = await Promise.all(
+      args.moraleIds.map((id) => ctx.db.get(id))
+    );
+
+    let totalScore = 0;
+    let count = 0;
+
+    for (const m of selectedMorales) {
+      if (!m) continue;
+      
+      // Assign values: Positive=100, Neutral=50, Negative=0
+      const val = m.type === "Positive" ? 100 
+                : m.type === "Neutral" ? 50 
+                : 0;
+      
+      totalScore += val;
+      count++;
+    }
+    const normalizedScore = count > 0 ? Math.round(totalScore / count) : 0;
+
     const reportId = await ctx.db.insert("feedback", {
       moraleIds: args.moraleIds,
-      //teamId: args.teamId,
+      teamId: args.teamId,
       email: args.email,
-      comment: args.comment
+      comment: args.comment,
+      score: normalizedScore, //used to calculate overall morale
     });
 
     return reportId;

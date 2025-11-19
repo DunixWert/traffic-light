@@ -173,4 +173,53 @@ export const seedTeamTable = internalMutation({
       })
     );
   }
-})
+});
+export const backfillFeedbackScores = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Fetch all Morale Definitions to build a Lookup Map
+    const allMorales = await ctx.db.query("morale").collect();
+    const moraleMap = new Map<string, number>();
+
+    allMorales.forEach((m) => {
+      // Assign values: Positive=100, Neutral=50, Negative=0
+      const val = m.type === "Positive" ? 100 
+                : m.type === "Neutral" ? 50 
+                : 0;
+      moraleMap.set(m._id, val);
+    });
+
+    // 2. Fetch ALL existing feedback
+    const allFeedback = await ctx.db.query("feedback").collect();
+    
+    let updatedCount = 0;
+
+    // 3. Iterate and Patch
+    for (const fb of allFeedback) {
+      // Calculate the score for this specific report
+      let totalScore = 0;
+      let count = 0;
+
+      for (const moraleId of fb.moraleIds) {
+        const score = moraleMap.get(moraleId);
+        // We explicitly check for undefined in case a morale ID is stale
+        if (score !== undefined) {
+          totalScore += score;
+          count++;
+        }
+      }
+
+      // Normalize (Average)
+      const newScore = count > 0 ? Math.round(totalScore / count) : 0;
+
+      // 4. Update the record using PATCH (only updates specific fields)
+      await ctx.db.patch(fb._id, {
+        score: newScore,
+      });
+      
+      updatedCount++;
+    }
+
+    return `Success: Backfilled scores for ${updatedCount} feedback records.`;
+  },
+});

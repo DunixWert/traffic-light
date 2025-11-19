@@ -29,8 +29,8 @@ export default defineSchema({
 
     email: v.optional(v.string()),
     comment: v.optional(v.string()),
-    
-  }),
+    score: v.number(),
+  }).index("by_team", ["teamId"]),
 
   summaries: defineTable({
     summary: v.string(), 

@@ -1,6 +1,7 @@
 import {mutation, query} from "./_generated/server";
 import { v } from "convex/values";
 
+
 // Fetching all morale options for use in the EmotionsSelector component
 export const getAllMorale = query({
   handler: async (ctx) => {
