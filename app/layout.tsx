@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
+import { Navbar } from "@/components/layout/navbar";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -30,24 +31,27 @@ export default function RootLayout({
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang="en">
-        <body 
+        <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-traffic-pulse`}
         >
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-          <Toaster 
-            position="top-center" 
-            richColors 
+          <ConvexClientProvider>
+            <Navbar></Navbar>
+            {children}
+          </ConvexClientProvider>
+          <Toaster
+            position="top-center"
+            richColors
             theme="light"
             closeButton
             toastOptions={{
               classNames: {
                 // p-5: Increases internal padding (breathing room)
                 // gap-4: Increases space between the icon and the text
-                toast: "p-5 gap-10 shadow-lg border-2", 
+                toast: "p-5 gap-10 shadow-lg border-2",
                 title: "text-base font-bold", // Optional: Make title slightly larger
                 description: "text-sm text-slate-600", // Optional: Style description
               }
-            }}/>
+            }} />
         </body>
       </html>
     </ConvexAuthNextjsServerProvider>
