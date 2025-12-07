@@ -8,6 +8,9 @@ existing entries to avoid duplicates.
 */
 // The list of emotions from the project plan
 const moraleData = [
+  { name: "Good", type: "Positive" },
+  { name: "Okay", type: "Neutral" },
+  { name: "Struggling", type: "Negative" },
   { name: "Joyful", type: "Positive" },
   { name: "Grateful", type: "Positive" },
   { name: "Serene", type: "Positive" },
